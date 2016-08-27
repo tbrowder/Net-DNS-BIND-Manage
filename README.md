@@ -1,2 +1,3 @@
-# Net-DNS-Manage-Perl6
-provides dns zone management tools for Bind similar to h2n (see "DNS and BIND")
+# Net-DNS-BIND-Manage-Perl6
+
+Provides dns zone management tools for Bind similar to *h2n* (see "DNS and BIND").
