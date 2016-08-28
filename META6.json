@@ -1,4 +1,5 @@
 {
+    "perl"        : "6.c"
     "name"        : "Net::DNS::BIND::Manage",
     "version"     : "*",
     "authors"     : [ "Tom Browder" ],
@@ -11,6 +12,7 @@
         "source"     : "https://github.com/tbrowder/Net-DNS-BIND-Manage-Perl6"
     },
     "provides"    : {
-        "Net::DNS::BIND::Manage" : "lib/Net/DNS/BIND/Manage.pm"
+        "Net::DNS::BIND::Manage" : "lib/Net/DNS/BIND/Manage.pm6"
     }
+    "depends"     : [],
 }
