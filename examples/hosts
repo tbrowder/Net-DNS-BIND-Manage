@@ -1,0 +1,18 @@
+# This follows the format of the *nix /etc/hosts file
+# and each line is a single, complete entry.
+# The first field is an IPv4 or IPv6 address.
+# The next field is a domain or sub domain name.
+# The next 0 to N fields are aliases for the domain name
+# that will result in a CNAME record.
+# A comment may end the line. Certain key words in a 
+# comment are recognized by the parser:
+#    [mx]         - the host is a mail server for all domains
+#    [nomx]       - this domain does not have a mail server
+#    [ns1]        - this is the primary name server
+#    [ns2]        - this is the secondary name server
+#    [priority=N] - priority for a mail server
+# Note that IPv4 addresses starting with the following
+# octets are ignored:
+#    127
+#    10
+#    192
