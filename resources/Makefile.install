@@ -1,0 +1,8 @@
+BINDIR := /usr/local/bin
+MANDIR := /usr/local/share/man/man1
+
+install:
+	install xxh32sum  ${BINDIR}
+	install xxh64sum  ${BINDIR}
+	install xxhsum    ${BINDIR}
+        install xxhsum.1  ${MANDIR}
