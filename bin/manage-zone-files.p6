@@ -1,7 +1,6 @@
 #!/usr/bin/env perl6
 
 use Getopt::Std;
-#use Digest::xxHash;
 
 =begin pod
 
@@ -215,9 +214,11 @@ sub reverse-net($dotted-token) {
     return $d;
 }
 
-sub xxhash-hex($file) returns Str{
-    # use native program 'xxhsum':
- die "fix this"
+sub my-hash($file) {
+    my $proc = shell "xxhsum $file", :out;
+    my $resp = $proc.out.slurp-rest;
+    my $hash = $resp.words[0];
+    return $hash;
 }
 
 sub write-soa-cmn()  {
@@ -299,12 +300,8 @@ sub check-or-create-files($ttl, $create = False) {
 	    say "  Serial is '$serial'..." if $verbose;
 
 	    # get its hash
-	    # 32 or 64 bit xxHash from file
-            # say xxHash(:file<filename.txt>);
-	    my $hash = xxHash64hex(:$file);
-	    #my $hexhash = xxhash-hex($hash);
+	    my $hash = my-hash($file);
 	    say "  Hash is       '$hash'..." if $verbose;
-	    #say "  Hash (hex) is '$hexhash'..." if $verbose;
             if $create {
                 my $bf = %h{$d}<bakfile>;
 		if !$is-reverse {
@@ -313,7 +310,7 @@ sub check-or-create-files($ttl, $create = False) {
 		else {
 		    warn "fix this";
 		}
-                my $bh = xxHash64hex(:file($bf));
+                my $bh = my-hash($bf);
                 if $hash ~~ $bh {
                     # no diff, no change needed
 		    say "  Base and bak files are the same--no change needed." if $verbose;
