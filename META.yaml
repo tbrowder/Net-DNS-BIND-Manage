@@ -1,0 +1,16 @@
+{
+    "name"        : "Net::DNS::BIND::Manage",
+    "version"     : "*",
+    "authors"     : [ "Tom Browder" ],
+    "description" : "provides management of DNS zone files for the Bind DNS server software",
+    "license"     : "Artistic 2.0",
+    "source-type" : "git",
+    "source-url"  : "git://github.com/tbrowder/Net-DNS-BIND-Manage-Perl6.git",
+    "support"     : {
+        "bugtracker" : "https://github.com/tbrowder/Net-DNS-BIND-Manage-Perl6/issues",
+        "source"     : "https://github.com/tbrowder/Net-DNS-BIND-Manage-Perl6"
+    },
+    "provides"    : {
+        "Net::DNS::BIND::Manage" : "lib/Net/DNS/BIND/Manage.pm"
+    }
+}
