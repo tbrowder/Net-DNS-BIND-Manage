@@ -28,18 +28,21 @@ All is based on the list of domains, hosts, and reverse mapped domains.
 
 ##### option handling ##############################
 my %opts;
-my ($create, $check, $debug, $verbose)
- = (False, False, False, False);
+my ($create, $check, $debug, $verbose, $rdns);
 sub usage() {
     say qq:to/END/;
-    Usage: $*PROGRAM -c | -C [-v, -d]
+    Usage: $*PROGRAM -c | -C [-v, -d, -r]
 
-    Creates or checks bind9 zone files.
+    Creates or checks Bind 9 zone files.
+
+    Modes:
+
+      -c create forward DNS zone files
+      -C check zone files
 
     Options:
 
-      -c create
-      -C check
+      -r create rDNS (reverse mapping) zone files
       -v verbose
       -d debug
     END
@@ -48,7 +51,7 @@ sub usage() {
 }
 # check for proper getopts signature
 usage() if !getopts(
-    'Ccdv',    # option string
+    'Ccdvr',    # option string
     %opts,
     @*ARGS
 );
@@ -61,6 +64,7 @@ else {
 }
 $debug   = True if %opts<d>;
 $verbose = True if %opts<v> || $debug;
+$rdns    := True if %opts<r>;
 ##### end option handling ##########################
 
 # some global vars (defined in BEGIN block at EOF)
