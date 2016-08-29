@@ -1,0 +1,21 @@
+branches:
+    only:
+        - master
+
+language: perl6
+
+perl6:
+    - latest
+
+# sudo required for xxhash installation
+sudo: required
+
+before_install:
+    # install xxhash into /usr/local (with special make file)
+    - curl https://codeload.github.com/Cyan4973/{xxHash}/{tar.gz}/{v0.6.2} -o "#1-#3.#2"
+    - tar -xvzf xxHash-v0.6.2.tar.gz
+    - cd xxHash-0.6.2
+    - cp ../resources/Makefile.install .
+    - make && make test
+    - sudo make -f Makefile.install
+    - cd $TRAVIS_BUILD_DIR
