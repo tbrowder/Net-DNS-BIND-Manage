@@ -19,3 +19,4 @@ nytprof.out
 *.bs
 /_eumm/
 lib/.precomp
+examples/manage-zone-files.p6
