@@ -31,15 +31,16 @@ class Build is Panda::Builder {
 	    my $binfils = 0;
 	    for @binfils -> $bf {
 		my $file = $pref ~ '/bin' ~ $bf;
-		++$binfils if $file.IO ~ :e;
+		++$binfils if $file.IO.f;
 	    }
 	    my $manfils = 0;
 	    for @manfils -> $mf {
 		my $file = $pref ~ '/share/man/man1' ~ $mf;
-		++$manfils if $file.IO ~ :e;
+		++$manfils if $file.IO.f;
 	    }
 	    if $binfils == $binfils-needed && $manfils == $manfils-needed {
-                say "All dependencies found.";
+                #say "All dependencies found.";
+                announce("All dependencies found.");
 		$all-files-found = True;
 		last FILE-CHECK;
 	    }
@@ -49,14 +50,14 @@ class Build is Panda::Builder {
 	#if !$all-files-found {
 	if True {
 	    # need to download and build
-            shell "rm -rf $repodir" if $repodir.IO ~~ :e;
+            shell "rm -rf $repodir" if $repodir.IO.e;
 
 	    my $gitrepo = "https://github.com/Cyan4973/xxHash.git";
             say "Cloning '$gitrepo' into '$repodir'";
 	    shell "git clone https://github.com/Cyan4973/xxHash.git $repodir";
 
             say "DEBUG: Removing '$repodir'";
-            shell "rm -rf $repodir" if $repodir.IO ~~ :e;
+            shell "rm -rf $repodir" if $repodir.IO.e;
         }
 
     }

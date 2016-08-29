@@ -4,7 +4,7 @@
 # The next field is a domain or sub domain name.
 # The next 0 to N fields are aliases for the domain name
 # that will result in a CNAME record.
-# A comment may end the line. Certain key words in a 
+# A comment may end the line. Certain key words in a
 # comment are recognized by the parser:
 #    [mx]         - the host is a mail server for all domains
 #    [nomx]       - this domain does not have a mail server
@@ -15,4 +15,4 @@
 # octets are ignored:
 #    127
 #    10
-#    192
+#    192.168
