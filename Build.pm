@@ -4,8 +4,10 @@ use LWP::Simple;
 
 class Build is Panda::Builder {
     method build($workdir) {
-        my $need-download = False;
 
+        # local dir for xxHash repo
+        my $repodir = 'xxHash-git-repo-clone';
+      
         # no Windows support
         if $*DISTRO.is-win {
 	    die "FATAL:  No support for Windows yet.";
@@ -33,36 +35,28 @@ class Build is Panda::Builder {
 	    }
 	    my $manfils = 0;
 	    for @manfils -> $mf {
-		my $file = $pref ~ '/share/man/man1' ~ $bf;
+		my $file = $pref ~ '/share/man/man1' ~ $mf;
 		++$manfils if $file.IO ~ :e;
 	    }
 	    if $binfils == $binfils-needed && $manfils == $manfils-needed {
+                say "All dependencies found.";
 		$all-files-found = True;
 		last FILE-CHECK;
 	    }
 	}
 
 	# not finished if not all files found
-	if !$all-files-found {
+	#if !$all-files-found {
+	if True {
 	    # need to download and build
-	    my $arch = "https://codeload.github.com/Cyan4973/{xxHash}/{tar.gz}/{v0.6.2}";
-            say "Fetching  $arch";
+            shell "rm -rf $repodir" if $repodir.IO ~~ :e;
 
-=begin pod
+	    my $gitrepo = "https://github.com/Cyan4973/xxHash.git";
+            say "Cloning '$gitrepo' into '$repodir'";
+	    shell "git clone https://github.com/Cyan4973/xxHash.git $repodir";
 
-            my $blob = LWP::Simple.get($arch);
-            say "Unpacking  $f";
-            spurt("$basedir\\$f", $blob);
-
-            say "Verifying $f";
-            my $hash = ps-hash("$basedir\\$f");
-            if ($hash ne $h) {
-                die "Bad download of $f (got: $hash; expected: $h)";
-            }
-            say "";
-
-=end pod
-
+            say "DEBUG: Removing '$repodir'";
+            shell "rm -rf $repodir" if $repodir.IO ~~ :e;
         }
 
     }
