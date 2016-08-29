@@ -1,13 +1,14 @@
 use Panda::Builder;
-
 use LWP::Simple;
+use Panda::Common; # 'run-and-gather-output'
+#use Panda;
 
 class Build is Panda::Builder {
-    method build($workdir) {
+    method build($dir) {
 
         # local dir for xxHash repo
         my $repodir = 'xxHash-git-repo-clone';
-      
+
         # no Windows support
         if $*DISTRO.is-win {
 	    die "FATAL:  No support for Windows yet.";
@@ -39,8 +40,8 @@ class Build is Panda::Builder {
 		++$manfils if $file.IO.f;
 	    }
 	    if $binfils == $binfils-needed && $manfils == $manfils-needed {
-                #say "All dependencies found.";
-                announce("All dependencies found.");
+                say "All dependencies found.";
+                #Panda::announce "All dependencies found."
 		$all-files-found = True;
 		last FILE-CHECK;
 	    }
@@ -54,11 +55,13 @@ class Build is Panda::Builder {
 
 	    my $gitrepo = "https://github.com/Cyan4973/xxHash.git";
             say "Cloning '$gitrepo' into '$repodir'";
-	    shell "git clone https://github.com/Cyan4973/xxHash.git $repodir";
+	    #shell "git clone https://github.com/Cyan4973/xxHash.git $repodir";
+	    run-and-gather-output "git", "clone", "https://github.com/Cyan4973/xxHash.git", "$repodir";
 
             say "DEBUG: Removing '$repodir'";
             shell "rm -rf $repodir" if $repodir.IO.e;
         }
 
+	return "what's up, doc?";
     }
 }
