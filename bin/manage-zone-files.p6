@@ -1,7 +1,9 @@
 #!/usr/bin/env perl6
 
 use Getopt::Std;
-use Net::DNS::BIND::Manage;
+#use Net::DNS::BIND::Manage;
+
+use lib <../lib>;
 
 =begin pod
 
@@ -29,10 +31,10 @@ All is based on the list of domains, hosts, and reverse mapped domains.
 
 ##### option handling ##############################
 my %opts;
-my ($create, $check, $debug, $verbose, $rdns);
+my ($create, $check, $debug, $verbose, $rdns, $tmpl);
 sub usage() {
     say qq:to/END/;
-    Usage: $*PROGRAM -c | -C [-v, -d, -r]
+    Usage: $*PROGRAM -c | -C [-v, -d, -r, -t]
 
     Creates or checks Bind 9 zone files.
 
@@ -44,6 +46,7 @@ sub usage() {
     Options:
 
       -r create rDNS (reverse mapping) zone files
+      -t create named.conf template files (only if none exists)
       -v verbose
       -d debug
     END
@@ -52,7 +55,7 @@ sub usage() {
 }
 # check for proper getopts signature
 usage() if !getopts(
-    'Ccdvr',    # option string
+    'Ccdvrt',    # option string
     %opts,
     @*ARGS
 );
@@ -80,7 +83,7 @@ my $mxnet = '142.54.186.3';
 
 # domain reverse mapping (just for the mail server)
 # reverse mapping of mailer
-my $mxr = reverse-net($mxnet);
+#my $mxr = reverse-net($mxnet);
 
 # name server addresses
 my $ns1net = '159.203.190.205';

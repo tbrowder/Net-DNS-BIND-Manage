@@ -6,6 +6,7 @@ my @keywords = <
     ns1
     ns2
     priority
+    rdns
 >;
 
 sub read-hosts(:$file, :%hosts, :%net) is export {
@@ -168,7 +169,7 @@ sub write-soa-cmn()  {
     return $cmn;
 }
 
-sub check-or-create-files($ttl, $create = False) {
+sub check-or-create-files($ttl, $create = False) is export {
     # need to check and update serial numbers if necessary
     # scheme:
     #   assemble hash (%h) of zone master file names to be written or checked
