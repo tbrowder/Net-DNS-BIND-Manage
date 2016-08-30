@@ -9,12 +9,14 @@ constant $sdir = 'slave';
 constant $soa-spaces = ' ' x 9;
 # assumes serial number is no more than 10 chars
 constant $max-serial-len = 10;
-
 my $fhnamedmaster = Nil;
 my $fhnamedslave  = Nil;
 my $soa-cmn       = Nil;
 my %domain;
 my %misc;
+my $ns1net; # IPv4
+my $ns2net; # IPv4
+my $rp;
 
 =begin pod
     my (%h, @domains, %net, %host, $max-serial-len,
@@ -37,6 +39,7 @@ sub check-or-create-files(:%opts, Str :$ttl = '3h') is export {
     my $create  = ?%opts<c>;
     my $check   = !$create;
     my $verbose = ?%opts<c>;
+    $rp         = %opts<R> ?? %opts<R> !! Nil;
 
     # need to check and update serial numbers if necessary
     # scheme:
@@ -73,7 +76,7 @@ sub check-or-create-files(:%opts, Str :$ttl = '3h') is export {
 	%domain{$d}<file>    = "$mdir/db.$d";
 	%domain{$d}<bakfile> = "$bdir/db.$d.bak";
     }
-    if $rdns {
+    if $do-rdns {
 	die 'fix this';
 	#%domain{$mxr}<file>    = "$mdir/db.$mxr";
 	#%domain{$mxr}<bakfile> = "$bdir/db.$mxr.bak";
@@ -113,7 +116,6 @@ sub check-or-create-files(:%opts, Str :$ttl = '3h') is export {
                     # no diff, no change needed
 		    say "  Base and bak files are the same--no change needed."
                         if %opts<v>;
-ptv
                 }
                 else {
 		    say "  Base and bak files are NOT the same--new file and serial needed." 
@@ -160,7 +162,7 @@ ptv
     }
 }
 
-sub reverse-net($dotted-token) {
+sub reverse-net($dotted-token) is export {
     # from h2n, sub REVERSE:
     #
     # Reverse the octets of a network specification or the labels of a
@@ -195,7 +197,7 @@ sub reverse-net($dotted-token) {
 ##### end exported subs #####
 
 ##### local subs #####
-sub read-hosts(:$file = 'hosts', :%domain, :%misc)  {
+sub read-hosts-file(:$file = 'hosts', :%domain, :%misc)  {
     my $fh = open $file;
     LINE:
     for $fh.IO.lines -> $line is rw {
@@ -260,7 +262,10 @@ sub read-zone-serial-from-file($file) returns Int {
 }
 
 sub write-soa($fp, $domain, $serial, $ttl = '3h') {
+    my $d = $domain;
     $fp.say("\$TTL $ttl");
+    my $ns1 = %misc<ns1>;
+    my $rp = %domain{$d}<rp> ?? %domain{$d}<rp> !! "root.$d";
     $fp.say("$domain. IN SOA $ns1. $rp. (");
 
     my $len = $max-serial-len;

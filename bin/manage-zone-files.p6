@@ -35,7 +35,7 @@ my %opts;
 my ($create, $check, $debug, $verbose, $rdns, $tmpl);
 sub usage() {
     say qq:to/END/;
-    Usage: $*PROGRAM -c | -C [-v, -d, -r]
+    Usage: $*PROGRAM -c | -C [-v, -d, -r, -R]
 
     Creates or checks Bind 9 zone files.
 
@@ -46,6 +46,7 @@ sub usage() {
 
     Options:
 
+      -R 
       -r create rDNS (reverse mapping) zone files
       -v verbose
       -d debug
@@ -55,7 +56,7 @@ sub usage() {
 }
 # check for proper getopts signature
 usage() if !getopts(
-    'Ccdvr',    # option string
+    'CcdvrR:',    # option string
     %opts,
     @*ARGS
 );
