@@ -1,9 +1,10 @@
 #!/usr/bin/env perl6
 
 use Getopt::Std;
-#use Net::DNS::BIND::Manage;
 
-use lib <../lib>;
+use lib <../lib ../../../../lib>;
+use Net::DNS::BIND::Manage;
+
 
 =begin pod
 
@@ -34,7 +35,7 @@ my %opts;
 my ($create, $check, $debug, $verbose, $rdns, $tmpl);
 sub usage() {
     say qq:to/END/;
-    Usage: $*PROGRAM -c | -C [-v, -d, -r, -t]
+    Usage: $*PROGRAM -c | -C [-v, -d, -r]
 
     Creates or checks Bind 9 zone files.
 
@@ -46,7 +47,6 @@ sub usage() {
     Options:
 
       -r create rDNS (reverse mapping) zone files
-      -t create named.conf template files (only if none exists)
       -v verbose
       -d debug
     END
@@ -55,7 +55,7 @@ sub usage() {
 }
 # check for proper getopts signature
 usage() if !getopts(
-    'Ccdvrt',    # option string
+    'Ccdvr',    # option string
     %opts,
     @*ARGS
 );
@@ -68,13 +68,8 @@ else {
 }
 $debug   = True if %opts<d>;
 $verbose = True if %opts<v> || $debug;
-$rdns    := True if %opts<r>;
+$rdns    = True if %opts<r>;
 ##### end option handling ##########################
-
-# some global vars (defined in BEGIN block at EOF)
-my (%h, @domains, %net, %host, $max-serial-len,
-    $soa-spaces, $soa-cmn, $bakdir,
-    $fhnamedmaster, $fhnamedslave);
 
 # address of most domains:
 my $dnet = '142.54.186.2';
@@ -95,7 +90,7 @@ my $ns2 = 'ns2.tbrowder.net'; # primary name server
 my $rp  = 'tom\.browder.gmail.com';
 
 my $ttl = '3h'; # standard, shorten when doing maintenance or changes
-check-or-create-files($ttl, $create);
+check-or-create-files(:%opts, :$ttl, :$rdns, :$create);
 
 if $check {
     say 'Exiting after check.';
@@ -143,46 +138,3 @@ write-zone-master($fm, $mxr);
 write-zone-slave($fs, $mxr);
 
 =end pod
-
-
-##### subroutines #####
-
-############ end subroutines ################
-BEGIN {
-    # define some global vars
-
-    $bakdir = 'bak';
-    $fhnamedmaster = Nil;
-    $fhnamedslave  = Nil;
-
-    $soa-spaces = ' ' x 9;
-    # assumes serial number is no more than 10 chars
-    $max-serial-len = 10;
-
-    # list of domains for the public
-    @domains = <
-        f-111.org
-        tbrowder.net
-        highlandsprings61.org
-    >;
-
-    # hash of special needs by net and domain
-    %net = [
-	# keyed by network
-	'142.54.186.2/31' => {},
-	'142.54.186.4/31' => {},
-	'142.54.186.6/32' => {},
-    ];
-
-    # domains with hosts
-    %host = [
-	'tbrowder.net' => {
-	    hosts => [
-		'bigtom',
-		'ns1',
-		'ns2',
-		'mail'
-	    ]
-	},
-    ];
-}
