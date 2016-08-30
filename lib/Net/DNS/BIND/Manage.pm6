@@ -1,5 +1,27 @@
 unit module Net::DNS::BIND::Manage;
 
+my $debug = 1;
+
+##### local vars #####
+constant $bdir = 'bak';
+constant $mdir = 'master';
+constant $sdir = 'slave';
+constant $soa-spaces = ' ' x 9;
+# assumes serial number is no more than 10 chars
+constant $max-serial-len = 10;
+
+my $fhnamedmaster = Nil;
+my $fhnamedslave  = Nil;
+my $soa-cmn       = Nil;
+my %domain;
+my %misc;
+
+=begin pod
+    my (%h, @domains, %net, %host, $max-serial-len,
+    $soa-spaces, $soa-cmn, $bakdir,
+    $fhnamedmaster, $fhnamedslave);
+=end pod
+
 my @keywords = <
     mx
     nomx
@@ -9,17 +31,181 @@ my @keywords = <
     rdns
 >;
 
-sub read-hosts(:$file, :%hosts, :%net) is export {
-    my $fh = open $fiie;
+##### exported subs #####
+sub check-or-create-files(:%opts, Str :$ttl = '3h') is export {
+    my $do-rdns = ?%opts<r>;
+    my $create  = ?%opts<c>;
+    my $check   = !$create;
+    my $verbose = ?%opts<c>;
+
+    # need to check and update serial numbers if necessary
+    # scheme:
+    #   assemble hash (%h) of zone master file names to be written or checked
+    #     for each file in hash
+    #       if file exists
+    #         set %h<file><hash> to file hash
+    #         read file to get file serial
+    #         set %h<file><serial> to file serial
+    #       else
+    #         set %h<file><hash> to zero
+    #         set %h<file><serial> to zero
+    #
+
+    # need some dirs they don't exist
+    for $bdir, $mdir, $sdir -> $d {
+	mkdir $d if !$d.IO.e;
+    }
+
+    # info needed for create option
+    if $create {
+	# soa boiler plate:
+	$soa-cmn = write-soa-cmn();
+	# named.conf for master and slave
+	$fhnamedmaster = open './master/named.conf', :w;
+	$fhnamedslave  = open './slave/named.conf', :w;
+	create-named-master($fhnamedmaster);
+	create-named-slave($fhnamedslave);
+    }
+
+    # collect file data into hashes
+    read-hosts-file();
+    for %domain.keys -> $d {
+	%domain{$d}<file>    = "$mdir/db.$d";
+	%domain{$d}<bakfile> = "$bdir/db.$d.bak";
+    }
+    if $rdns {
+	die 'fix this';
+	#%domain{$mxr}<file>    = "$mdir/db.$mxr";
+	#%domain{$mxr}<bakfile> = "$bdir/db.$mxr.bak";
+    }
+
+    my $nfiles = 0;
+    my $nfound = 0;
+    for %domain.keys -> $d {
+	++$nfiles;
+
+	# is this a reverse mapping?
+	my $is-reverse = $d ~~ /\d+'.'\d+'.'\d+/ ?? True !! False;
+
+	my $file = %domain{$d}<file>; # base file
+	say "Checking for file '$file'..." if %opts<v>;
+	# file exists?
+	if $file.IO.f {
+	    ++$nfound;
+	    say "  True: Found file '$file'..." if %opts<v>;
+	    # get the serial number
+	    my Int $serial = read-zone-serial-from-file($file);
+	    say "  Serial is '$serial'..." if %opts<v>;
+
+	    # get its hash
+	    my $hash = xxhash-wrapper($file);
+	    say "  Hash is       '$hash'..." if %opts<v>;
+            if $create {
+                my $bf = %domain{$d}<bakfile>;
+		if !$is-reverse {
+                    create-zone-master-db($d, $serial, $bf, $ttl);
+		}
+		else {
+		    warn "fix this";
+		}
+                my $bh = xxhash-wrapper($bf);
+                if $hash ~~ $bh {
+                    # no diff, no change needed
+		    say "  Base and bak files are the same--no change needed."
+                        if %opts<v>;
+ptv
+                }
+                else {
+		    say "  Base and bak files are NOT the same--new file and serial needed." 
+                        if %opts<v>;
+                    # need a new file
+		    say "    Old serial: $serial";
+                    ++$serial;
+		    say "    New serial: $serial";
+		    if !$is-reverse {
+			create-zone-master-db($d, $serial, $file, $ttl);
+		    }
+		    else {
+			warn "fix this";
+		    }
+                }
+                unlink $bf if !$debug;
+            }
+	}
+	else {
+	    # set values
+	    say "  False: File '$file' NOT found..." if %opts<v>;
+            if $create {
+                # need a new file
+		say "  Creating a new base file with serial = 1." if %opts<v>;
+                my $serial = 1;
+		if !$is-reverse {
+                    create-zone-master-db($d, $serial, $file);
+		}
+		else {
+		    warn "fix this";
+		}
+            }
+	}
+
+    }
+
+    if %opts<v> {
+	my $s = $nfiles > 1 ?? 's' !! '';
+	my $nm = $nfiles - $nfound;
+	if !$create {
+	    say "Checked for $nfiles file$s.  Found $nfound.";
+	    say "Missing $nm to be created anew.";
+	}
+    }
+}
+
+sub reverse-net($dotted-token) {
+    # from h2n, sub REVERSE:
+    #
+    # Reverse the octets of a network specification or the labels of a
+    # domain name.  Only unescaped "." characters are recognized as
+    # octet/label delimiters.
+
+    my $d = $dotted-token;
+
+    #say "================";
+    #say "\$ip in = '$d'";
+    $d ~~ s:g:s/([^\\])'.'/$0 /;
+    #say "\$ip spaces for dots = '$d'";
+    #say "================";
+
+    $d = $dotted-token;
+    #say "\$ip in = '$d'";
+    if $d ~~ m:s/(<-[\\]>)'.'/ {
+	#say "\$0 = '$0'";
+        $d ~~ s:g:s/(<-[\\]>)\./$0 /;
+    }
+    else {
+	#say "no match";
+    }
+    #say "\$ip spaces = '$d'";
+    my @d = $d.words;
+    #print "\$ip split = ";
+    #say @d.gist;
+    $d = join '.', reverse @d;
+    #say "\$ip reversed = '$d'";
+    return $d;
+}
+##### end exported subs #####
+
+##### local subs #####
+sub read-hosts(:$file = 'hosts', :%domain, :%misc)  {
+    my $fh = open $file;
     LINE:
     for $fh.IO.lines -> $line is rw {
         my $idx = index $line, '#';
-        my $coment;
+        my $comment;
         if $idx {
             $comment = substr $line, $idx + 1;
             $line    = substr $line, 0, $idx
         }
-        # extract info from $line: ip, domain, aliases
+        # extract info from9 $line: ip, domain, aliases
         my @words = $line.words;
 
         my $ip = @words.shift;
@@ -37,25 +223,24 @@ sub read-hosts(:$file, :%hosts, :%net) is export {
         my $domain = @words.shift;
         %domain{$domain}<net> = $ip;
 
-        my @aiases = @words;
+        my @aliases = @words;
         %domain{$domain}<aliases> = @aliases;
 
         # extract info from any comment: key words
         if $comment {
             for @keywords -> $kw {
-                if $comment ~~ / '[' $kw \s* ['=' \s* (<[\w\d]+>) \s* ']' / {
+                if $comment ~~ / '[' $kw \s* [ '=' \s* (<[\w\d]>*) \s* ]? ']' / {
                     my $val = $0;
                     %domain{$domain}<keywords>{$kw} = $val;
+                    %misc<ns1> = $domain if $kw ~~ /ns1/;
+                    %misc<ns2> = $domain if $kw ~~ /ns2/;
                 }
             }
         }
     }
 }
 
-sub xx-hash($file) is export {
-}
-
-sub read-template($file) is export {
+sub read-template($file) {
     return slurp($file);
 }
 
@@ -102,40 +287,7 @@ sub write-ns($fp, $domain) {
 sub write-mx($fp, $domain) {
 }
 
-sub reverse-net($dotted-token) {
-    # from h2n, sub REVERSE:
-    #
-    # Reverse the octets of a network specification or the labels of a
-    # domain name.  Only unescaped "." characters are recognized as
-    # octet/label delimiters.
-
-    my $d = $dotted-token;
-
-    #say "================";
-    #say "\$ip in = '$d'";
-    $d ~~ s:g:s/([^\\])'.'/$0 /;
-    #say "\$ip spaces for dots = '$d'";
-    #say "================";
-
-    $d = $dotted-token;
-    #say "\$ip in = '$d'";
-    if $d ~~ m:s/(<-[\\]>)'.'/ {
-	#say "\$0 = '$0'";
-        $d ~~ s:g:s/(<-[\\]>)\./$0 /;
-    }
-    else {
-	#say "no match";
-    }
-    #say "\$ip spaces = '$d'";
-    my @d = $d.words;
-    #print "\$ip split = ";
-    #say @d.gist;
-    $d = join '.', reverse @d;
-    #say "\$ip reversed = '$d'";
-    return $d;
-}
-
-sub my-hash($file) {
+sub xxhash-wrapper($file) {
     my $proc = shell "xxhsum $file", :out;
     my $resp = $proc.out.slurp-rest;
     my $hash = $resp.words[0];
@@ -167,120 +319,6 @@ sub write-soa-cmn()  {
 	$cmn ~= "\n";
     }
     return $cmn;
-}
-
-sub check-or-create-files($ttl, $create = False) is export {
-    # need to check and update serial numbers if necessary
-    # scheme:
-    #   assemble hash (%h) of zone master file names to be written or checked
-    #     for each file in hash
-    #       if file exists
-    #         set %h<file><hash> to file hash
-    #         read file to get file serial
-    #         set %h<file><serial> to file serial
-    #       else
-    #         set %h<file><hash> to zero
-    #         set %h<file><serial> to zero
-    #
-
-    # info needed for create option
-    if $create {
-	# soa boiler plate:
-	$soa-cmn = write-soa-cmn();
-	# named.conf for master and slave
-	$fhnamedmaster = open './master/named.conf', :w;
-	$fhnamedslave  = open './slave/named.conf', :w;
-	create-named-master($fhnamedmaster);
-	create-named-slave($fhnamedslave);
-    }
-
-    # collect file data into %h
-    for @domains -> $d {
-	%h{$d}<file>    = "master/db.$d";
-	%h{$d}<bakfile> = "$bakdir/db.$d.bak";
-    }
-    %h{$mxr}<file>    = "master/db.$mxr";
-    %h{$mxr}<bakfile> = "$bakdir/db.$mxr.bak";
-
-    my $nfiles = 0;
-    my $nfound = 0;
-    for %h.keys -> $d {
-	++$nfiles;
-
-	# is this a reverse mapping?
-	my $is-reverse = $d ~~ /\d+'.'\d+'.'\d+/ ?? True !! False;
-
-	my $file = %h{$d}<file>; # base file
-	say "Checking for file '$file'..." if $verbose;
-	# file exists?
-	if $file.IO ~~ :e {
-	    ++$nfound;
-	    say "  True: Found file '$file'..." if $verbose;
-	    # get the serial number
-	    my Int $serial = read-zone-serial-from-file($file);
-	    say "  Serial is '$serial'..." if $verbose;
-
-	    # get its hash
-	    my $hash = my-hash($file);
-	    say "  Hash is       '$hash'..." if $verbose;
-            if $create {
-                my $bf = %h{$d}<bakfile>;
-		if !$is-reverse {
-                    create-zone-master-db($d, $serial, $bf, $ttl);
-		}
-		else {
-		    warn "fix this";
-		}
-                my $bh = my-hash($bf);
-                if $hash ~~ $bh {
-                    # no diff, no change needed
-		    say "  Base and bak files are the same--no change needed." if $verbose;
-                }
-                else {
-		    say "  Base and bak files are NOT the same--new file and serial needed." if $verbose;
-                    # need a new file
-		    say "    Old serial: $serial";
-                    ++$serial;
-		    say "    New serial: $serial";
-		    if !$is-reverse {
-			create-zone-master-db($d, $serial, $file, $ttl);
-		    }
-		    else {
-			warn "fix this";
-		    }
-                }
-                unlink $bf if !$debug;
-            }
-	}
-	else {
-	    # set values
-	    say "  False: File '$file' NOT found..." if $verbose;
-            if $create {
-                # need a new file
-		say "  Creating a new base file with serial = 1." if $verbose;
-                my $serial = 1;
-		if !$is-reverse {
-                    create-zone-master-db($d, $serial, $file);
-		}
-		else {
-		    warn "fix this";
-		}
-            }
-	}
-
-    }
-
-    if $verbose {
-	my $s = $nfiles > 1 ?? 's' !! '';
-	my $nm = $nfiles - $nfound;
-	if $check {
-	    say "Checked for $nfiles file$s.  Found $nfound.";
-	    say "Missing $nm to be created anew.";
-	}
-	else {
-	    # create
-	}
-    }
 }
 
 sub create-zone-master-db($domain, $serial, $file, $ttl = '3h') {
