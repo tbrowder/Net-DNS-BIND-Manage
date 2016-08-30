@@ -19,5 +19,5 @@ nytprof.out
 *.bs
 /_eumm/
 lib/.precomp
-examples/manage-zone-files.p6
+example/manage-zone-files.p6
 *save*
