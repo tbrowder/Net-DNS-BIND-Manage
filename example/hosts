@@ -11,6 +11,7 @@
 #    [ns1]        - this is the primary name server
 #    [ns2]        - this is the secondary name server
 #    [priority=N] - priority for a mail server
+
 # Note that IPv4 addresses starting with the following
 # octets are ignored:
 #    127
