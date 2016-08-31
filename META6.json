@@ -17,6 +17,9 @@
     "build-depends"     : [
 	"Test::Meta"
     ],
+    "test-depends"     : [
+	"Test::Meta"
+    ],
     "depends"     : [
 	"Digest::MD5"
     ],
