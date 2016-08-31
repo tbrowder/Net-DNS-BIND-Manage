@@ -17,3 +17,12 @@
 #    127
 #    10
 #    192.168
+#
+# following is an example to use for testing
+1.2.3.4 example.com      
+1.2.3.4 ns1.example.net             # [ns1]
+1.2.3.4 mail.example.com            # [mx] [priority=20]
+
+2.3.4.5 fortuna.example.net fort fo
+2.3.4.6 mail.example.net            # [mx] [priority=10]
+2.3.4.7 ns2.example.net             # [ns2]

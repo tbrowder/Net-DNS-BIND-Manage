@@ -35,7 +35,7 @@ my %opts;
 my ($create, $check, $debug, $verbose, $rdns, $tmpl);
 sub usage() {
     say qq:to/END/;
-    Usage: $*PROGRAM -c | -C [-v, -d, -r, -R]
+    Usage: $*PROGRAM -c | -C [-v, -d, -r, -R, -f]
 
     Creates or checks Bind 9 zone files.
 
@@ -46,7 +46,8 @@ sub usage() {
 
     Options:
 
-      -R 
+      -R <reponsible party e-mail> default: 'root@domain'
+      -f <hosts file>              default: 'hosts' 
       -r create rDNS (reverse mapping) zone files
       -v verbose
       -d debug
@@ -56,7 +57,7 @@ sub usage() {
 }
 # check for proper getopts signature
 usage() if !getopts(
-    'CcdvrR:',    # option string
+    'CcdvrR:f:',    # option string
     %opts,
     @*ARGS
 );
@@ -72,26 +73,11 @@ $verbose = True if %opts<v> || $debug;
 $rdns    = True if %opts<r>;
 ##### end option handling ##########################
 
-# address of most domains:
-my $dnet = '142.54.186.2';
-# address of the mailer
-my $mxnet = '142.54.186.3';
-
-# domain reverse mapping (just for the mail server)
-# reverse mapping of mailer
-#my $mxr = reverse-net($mxnet);
-
-# name server addresses
-my $ns1net = '159.203.190.205';
-my $ns2net = '142.54.186.6';
-# name server names
-my $ns1 = 'ns1.tbrowder.net'; # primary name server
-my $ns2 = 'ns2.tbrowder.net'; # primary name server
 # responsible party
 my $rp  = 'tom\.browder.gmail.com';
-
 my $ttl = '3h'; # standard, shorten when doing maintenance or changes
-check-or-create-files(:%opts, :$ttl, :$rdns, :$create);
+
+check-or-create-files(:%opts, :$ttl);
 
 if $check {
     say 'Exiting after check.';
@@ -105,7 +91,7 @@ if $check {
 # say %domhosts.gist;
 # say "debug exit"; exit;
 
-if $debug {
+if 0 && $debug {
     say "testing octet reverse:";
     my $ip = '1.2.3.4';
     say "IP: '$ip'";

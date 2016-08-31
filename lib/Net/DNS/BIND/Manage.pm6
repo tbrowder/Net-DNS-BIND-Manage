@@ -1,7 +1,5 @@
 unit module Net::DNS::BIND::Manage;
 
-my $debug = 1;
-
 ##### local vars #####
 constant $bdir = 'bak';
 constant $mdir = 'master';
@@ -12,10 +10,13 @@ constant $max-serial-len = 10;
 my $fhnamedmaster = Nil;
 my $fhnamedslave  = Nil;
 my $soa-cmn       = Nil;
+my $debug         = False;
 my %domain;
 my %misc;
 my $ns1net; # IPv4
 my $ns2net; # IPv4
+my $ns1domain;
+my $ns2domain;
 my $rp;
 
 =begin pod
@@ -39,6 +40,8 @@ sub check-or-create-files(:%opts, Str :$ttl = '3h') is export {
     my $create  = ?%opts<c>;
     my $check   = !$create;
     my $verbose = ?%opts<c>;
+    my $file    = %opts<f> ?? %opts<f> !! 'hosts';
+    $debug      = ?%opts<d>;
     $rp         = %opts<R> ?? %opts<R> !! Nil;
 
     # need to check and update serial numbers if necessary
@@ -71,7 +74,7 @@ sub check-or-create-files(:%opts, Str :$ttl = '3h') is export {
     }
 
     # collect file data into hashes
-    read-hosts-file();
+    read-hosts-file($file);
     for %domain.keys -> $d {
 	%domain{$d}<file>    = "$mdir/db.$d";
 	%domain{$d}<bakfile> = "$bdir/db.$d.bak";
@@ -197,18 +200,24 @@ sub reverse-net($dotted-token) is export {
 ##### end exported subs #####
 
 ##### local subs #####
-sub read-hosts-file(:$file = 'hosts', :%domain, :%misc)  {
+sub read-hosts-file($file)  {
     my $fh = open $file;
+    my $lnum = 0;
     LINE:
-    for $fh.IO.lines -> $line is rw {
+    for $fh.IO.lines {
+        ++$lnum;
+        my $line = $_;
+        say "\$line $lnum = '$line'" if $debug;
         my $idx = index $line, '#';
+        say "\$idx = '$idx'" if $debug && $idx.defined;
         my $comment;
-        if $idx {
+        if $idx.defined {
             $comment = substr $line, $idx + 1;
             $line    = substr $line, 0, $idx
         }
         # extract info from9 $line: ip, domain, aliases
         my @words = $line.words;
+        next if !@words.elems;
 
         my $ip = @words.shift;
         # v4 or v6?
@@ -216,8 +225,8 @@ sub read-hosts-file(:$file = 'hosts', :%domain, :%misc)  {
         # ignore lines with public IPs
         if $typ == 4 {
             my @octets = $ip.split('.');
-            if @octets[0] == 10 || @octets[0] == 127
-	        || (@octets[0] == 192 && @octets[1] == 168) {
+            if @octets[0] ~~ /^[10 | 127]$/
+	        || (@octets[0] ~~ /192/ && @octets[1] ~~ /168/) {
                 next LINE;
             }
         }
@@ -234,8 +243,10 @@ sub read-hosts-file(:$file = 'hosts', :%domain, :%misc)  {
                 if $comment ~~ / '[' $kw \s* [ '=' \s* (<[\w\d]>*) \s* ]? ']' / {
                     my $val = $0;
                     %domain{$domain}<keywords>{$kw} = $val;
-                    %misc<ns1> = $domain if $kw ~~ /ns1/;
-                    %misc<ns2> = $domain if $kw ~~ /ns2/;
+                    $ns1net    = $ip if $kw ~~ /ns1/;
+                    $ns2net    = $ip if $kw ~~ /ns2/;
+                    $ns1domain = $domain if $kw ~~ /ns1/;
+                    $ns2domain = $domain if $kw ~~ /ns2/;
                 }
             }
         }
@@ -264,9 +275,8 @@ sub read-zone-serial-from-file($file) returns Int {
 sub write-soa($fp, $domain, $serial, $ttl = '3h') {
     my $d = $domain;
     $fp.say("\$TTL $ttl");
-    my $ns1 = %misc<ns1>;
     my $rp = %domain{$d}<rp> ?? %domain{$d}<rp> !! "root.$d";
-    $fp.say("$domain. IN SOA $ns1. $rp. (");
+    $fp.say("$domain. IN SOA $ns1net. $rp. (");
 
     my $len = $max-serial-len;
     my $sp  = $soa-spaces;
