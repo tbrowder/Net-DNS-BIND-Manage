@@ -10,9 +10,97 @@ and BIND").
 =for HTML <a href="https://travis-ci.org/tbrowder/Net-DNS-BIND-Manage-Perl6">
           <img src="https://travis-ci.org/tbrowder/Net-DNS-BIND-Manage-Perl6.svg?branch=master"></a>
 
+=head2
+
+The primary tool provided is the Perl 6 management program,
+C<manage-zone-files>.  Executing it with no arguments yields:
+
+  Usage: manage-zone-files -c | -C [-v, -d, -r, -R, -f]
+
+  Creates or checks Bind 9 zone files.
+
+  Modes:
+
+    -c create forward DNS zone files
+    -C check zone files
+
+  Options:
+
+    -R <reponsible party e-mail> default: 'root@domain'
+    -f <hosts file>              default: 'hosts'
+    -r create rDNS (reverse mapping) zone files [experimental]
+    -v verbose
+    -d debug
+
 =head2 Assumptions
+
+This suite is designed to provide forward DNS zone mapping only at the
+moment (but it does have an experimental reverse-mapping option).  It
+assumes one is using a two-dns server configuration with a master and
+a slave.  It is designed to use one mandatory, user-supplied data file
+and two optional, user-supplied data files.
+
+The user should dedicate a directory to zone management and it should
+be under version control.  When the management tool is run it will
+create three directories:
+
+  master
+  slave
+  bak
+
+It is not necessary to version control the three directories above.
+The management tool creates files in those directories when necessary,
+and files in the three directories may be deleted or overwritten
+without warning.
+
+The user-provided files are:
+
+=item hosts
+
+This file is mandatory, but it may have another name if desired.
+Using the format for the *nix /etc/hosts file, plus some keywords in
+the comment fields, the file should be able to provide all the zone
+data for the user's needs.
+
+The file may be named anything, but the default name expected is
+'hosts' and it is expected to be located in the current working
+directory.  If another name is used, it will have to be specified on
+the command line.
+
+=item templates/named.conf.master
+
+If this file is not provided, it will be created.
+
+An existing file will not be overwritten. The created file may be
+edited as desired and changes will not be overwritten.
+
+=item templates/named.conf.slave
+
+If this file is not provided, it will be created.
+
+An existing file will not be overwritten. The created file may be
+edited as desired and changes will not be overwritten.
 
 =head2 Installation
 
+Use one of the following two methods for a normal  Perl 6 environment:
+
+  zef install Net::DNS::BIND::Manage
+  panda install Net::DNS::BIND::Manage
+
+If either attempt shows that the module isn't found or available,
+ensure your installer is current:
+
+  zef update
+  panda update
+
+If you want to use the latest version in the git repository, clone it and then:
+
+  cd /path/to/cloned/repository/directory
+  zef install .
+
+or
+
+  panda install .
 
 =cut
