@@ -2,8 +2,8 @@
     "perl"        : "6.c",
     "name"        : "Net::DNS::BIND::Manage",
     "version"     : "*",
+    "description" : "Provides management of DNS zone files for the Bind DNS server software",
     "authors"     : [ "Tom Browder <tom.browder@gmail.com>" ],
-    "description" : "provides management of DNS zone files for the Bind DNS server software",
     "license"     : "Artistic 2.0",
     "source-type" : "git",
     "source-url"  : "git://github.com/tbrowder/Net-DNS-BIND-Manage-Perl6.git",
@@ -19,5 +19,7 @@
     ],
     "depends"     : [
 	"Digest::MD5"
+    ],
+    "resources" : [
     ]
 }
