@@ -15,6 +15,6 @@
         "Net::DNS::BIND::Manage" : "lib/Net/DNS/BIND/Manage.pm6"
     },
     "depends"     : [
-	"Digest::MD5",
+	"Digest::MD5"
     ]
 }
