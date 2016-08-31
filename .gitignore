@@ -24,3 +24,6 @@ example/manage-zone-files.p6
 lib/Net/DNS/BIND/bak
 lib/Net/DNS/BIND/master
 lib/Net/DNS/BIND/slave
+lib/Net/DNS/BIND/manage-zone-files.p6
+lib/Net/DNS/BIND/hosts
+uninst.sh
