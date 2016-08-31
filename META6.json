@@ -14,11 +14,8 @@
     "provides"    : {
         "Net::DNS::BIND::Manage" : "lib/Net/DNS/BIND/Manage.pm6"
     },
-    "build-depends"     : [
-	"Test::Meta"
-    ],
     "test-depends"     : [
-	"Test::Meta"
+	"Test::META"
     ],
     "depends"     : [
 	"Digest::MD5"
