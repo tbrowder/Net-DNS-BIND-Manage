@@ -1,0 +1,18 @@
+=pod
+
+=encoding utf8
+
+=head2 Net::DNS::BIND::Manage
+
+Provides dns zone management tools for Bind 9 similar to *h2n* (see "DNS
+and BIND").
+
+=for HTML <a href="https://travis-ci.org/tbrowder/Net-DNS-BIND-Manage-Perl6">
+          <img src="https://travis-ci.org/tbrowder/Net-DNS-BIND-Manage.svg?branch=master"></a>
+
+=head2 Assumptions
+
+=head2 Installation
+
+
+=cut
