@@ -21,3 +21,6 @@ nytprof.out
 lib/.precomp
 example/manage-zone-files.p6
 *save*
+lib/Net/DNS/BIND/bak
+lib/Net/DNS/BIND/master
+lib/Net/DNS/BIND/slave
