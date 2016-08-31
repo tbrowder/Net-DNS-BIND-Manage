@@ -15,14 +15,6 @@
         "Net::DNS::BIND::Manage" : "lib/Net/DNS/BIND/Manage.pm6"
     },
     "depends"     : [
-	"/usr/local/bin/xxh32sum",
-	"/usr/local/bin/xxh64sum",
-	"/usr/local/bin/xxhsum",
-	"/usr/local/share/man/man1/xxhsum.1"
-    ],
-    "build-depends" : [
-	"LWP::Simple",
-	"panda",
-	"Shell::Command"
+	"Digest::MD5",
     ]
 }

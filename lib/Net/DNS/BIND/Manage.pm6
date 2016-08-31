@@ -104,7 +104,7 @@ sub check-or-create-files(:%opts, Str :$ttl = '3h') is export {
 	    say "  Serial is '$serial'..." if %opts<v>;
 
 	    # get its hash
-	    my $hash = xxhash-wrapper($file);
+	    my $hash = md5sum($file);
 	    say "  Hash is       '$hash'..." if %opts<v>;
             if $create {
                 my $bf = %domain{$d}<bakfile>;
@@ -114,7 +114,7 @@ sub check-or-create-files(:%opts, Str :$ttl = '3h') is export {
 		else {
 		    warn "fix this";
 		}
-                my $bh = xxhash-wrapper($bf);
+                my $bh = md5sum($bf);
                 if $hash ~~ $bh {
                     # no diff, no change needed
 		    say "  Base and bak files are the same--no change needed."
@@ -302,11 +302,12 @@ sub write-ns($fp, $domain) {
 sub write-mx($fp, $domain) {
 }
 
-sub xxhash-wrapper($file) {
-    my $proc = shell "xxhsum $file", :out;
-    my $resp = $proc.out.slurp-rest;
-    my $hash = $resp.words[0];
-    return $hash;
+sub md5sum($file) is export {
+    use Digest::MD5;
+    my $d = Digest::MD5.new;
+    my $data = slurp $file;
+    my $hexhash = $d.md5_hex($data);
+    return $hexhash;
 }
 
 sub write-soa-cmn()  {
