@@ -55,6 +55,8 @@ without warning.
 
 The user-provided files are:
 
+=over
+
 =item hosts
 
 This file is mandatory, but it may have another name if desired.
@@ -80,6 +82,8 @@ If this file is not provided, it will be created.
 
 An existing file will not be overwritten. The created file may be
 edited as desired and changes will not be overwritten.
+
+=back
 
 =head2 Installation
 
