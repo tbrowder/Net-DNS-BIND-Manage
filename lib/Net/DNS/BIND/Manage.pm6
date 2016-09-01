@@ -121,7 +121,7 @@ sub check-or-create-files(:%opts, Str :$ttl = '3h') is export {
                         if %opts<v>;
                 }
                 else {
-		    say "  Base and bak files are NOT the same--new file and serial needed." 
+		    say "  Base and bak files are NOT the same--new file and serial needed."
                         if %opts<v>;
                     # need a new file
 		    say "    Old serial: $serial";
@@ -165,7 +165,41 @@ sub check-or-create-files(:%opts, Str :$ttl = '3h') is export {
     }
 }
 
-sub reverse-net($dotted-token) is export {
+sub is-ipv4($data) is export {
+    my $d = $data;
+
+    if $d ~~ m:s/(<-[\\]>)'.'/ {
+	#say "\$0 = '$0'";
+        $d ~~ s:g:s/(<-[\\]>)\./$0 /;
+	my @d = $d.words;
+	my $n = @d.elems;
+	return False if $n == 0 || $n > 4;
+
+	# if we have one to four octets of numbers 255 or less we consider it an IPv4
+	for @d -> $d {
+	    return False if $d !~~ /^ \d ** 1..3 $/;
+	    return False if $d > 255;
+	}
+	return True;
+    }
+    return False;
+}
+
+sub is-ipv6($data) is export {
+    my $d = $data;
+
+    my @d = $d.split(':');
+    my $n = @d.elems;
+    return False if $n == 0 || $n > 15;
+
+    for @d -> $d {
+	return False if $d !~~ /^ \d ** 1..8 $/;
+	return False if $d > 0xffff_ffff;
+    }
+    return True;
+}
+
+sub reverse-dotted-net($dotted-token) is export {
     # from h2n, sub REVERSE:
     #
     # Reverse the octets of a network specification or the labels of a
@@ -174,14 +208,19 @@ sub reverse-net($dotted-token) is export {
 
     my $d = $dotted-token;
 
+=begin pod
+
     #say "================";
     #say "\$ip in = '$d'";
-    $d ~~ s:g:s/([^\\])'.'/$0 /;
+    #$d ~~ s:g:s/([^\\])'.'/$0 /;
     #say "\$ip spaces for dots = '$d'";
     #say "================";
 
     $d = $dotted-token;
     #say "\$ip in = '$d'";
+
+=end pod
+
     if $d ~~ m:s/(<-[\\]>)'.'/ {
 	#say "\$0 = '$0'";
         $d ~~ s:g:s/(<-[\\]>)\./$0 /;
@@ -189,6 +228,7 @@ sub reverse-net($dotted-token) is export {
     else {
 	#say "no match";
     }
+
     #say "\$ip spaces = '$d'";
     my @d = $d.words;
     #print "\$ip split = ";
@@ -196,6 +236,33 @@ sub reverse-net($dotted-token) is export {
     $d = join '.', reverse @d;
     #say "\$ip reversed = '$d'";
     return $d;
+}
+
+sub reverse-ipv6($ipv6) is export {
+    # may be in one of many forms!!
+}
+
+sub read-zone-serial-from-file($file) returns Int is export {
+    my Int $serial = 0;
+    # given a file handle for a zone file
+    my $fh = open $file;
+    for $fh.IO.lines -> $line {
+	if $line ~~ /^ \s* (\d+) \s* ';' \s* 'Serial' \s* $/ {
+	    say "DEBUG: line = '$line'" if $debug;
+	    say "DEBUG: \$0 = '$0'" if $debug;
+	    $serial = +$0;
+	    return $serial; # the serial number
+	}
+    }
+    return $serial;
+}
+
+sub md5sum($file) is export {
+    use Digest::MD5;
+    my $d = Digest::MD5.new;
+    my $data = slurp $file;
+    my $hexhash = $d.md5_hex($data);
+    return $hexhash;
 }
 ##### end exported subs #####
 
@@ -257,21 +324,6 @@ sub read-template($file) {
     return slurp($file);
 }
 
-sub read-zone-serial-from-file($file) returns Int {
-    my Int $serial = $0;
-    # given a file handle for a zone file
-    my $fh = open $file;
-    for $fh.IO.lines -> $line {
-	if $line ~~ /^ \s* (\d+) \s* ';' \s* 'Serial' \s* $/ {
-	    say "DEBUG: line = '$line'" if $debug;
-	    say "DEBUG: \$0 = '$0'" if $debug;
-	    $serial = +$0;
-	    return $serial; # the serial number
-	}
-    }
-    return $serial;
-}
-
 sub write-soa($fp, $domain, $serial, $ttl = '3h') {
     my $d = $domain;
     $fp.say("\$TTL $ttl");
@@ -300,14 +352,6 @@ sub write-ns($fp, $domain) {
 }
 
 sub write-mx($fp, $domain) {
-}
-
-sub md5sum($file) is export {
-    use Digest::MD5;
-    my $d = Digest::MD5.new;
-    my $data = slurp $file;
-    my $hexhash = $d.md5_hex($data);
-    return $hexhash;
 }
 
 sub write-soa-cmn()  {
