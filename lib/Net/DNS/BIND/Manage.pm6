@@ -1,4 +1,5 @@
-unit module Net::DNS::BIND::Manage;
+unit module Net::DNS::BIND::Manage:ver<1.0.0>;
+
 
 ##### local vars #####
 constant $bdir = 'bak';
@@ -188,6 +189,12 @@ sub is-ipv4($data) is export {
 sub is-ipv6($data) is export {
     my $d = $data;
 
+    # rough check
+    if $data !~~ m:i/ \s* <[a-f\:\d]>+ \s* / {
+        return False;
+    }
+    die "fix this"
+
     my @d = $d.split(':');
     my $n = @d.elems;
     return False if $n == 0 || $n > 15;
@@ -236,6 +243,25 @@ sub reverse-dotted-net($dotted-token) is export {
     $d = join '.', reverse @d;
     #say "\$ip reversed = '$d'";
     return $d;
+}
+
+sub fill-ipv6($ip6data) is export {
+    # fill all eight fields, including all-zero fields, with eight hexadecimal digits
+    # coarse validity check
+    return '' if !is-ipv6($ipv6data);
+
+    # count doubled colons--only one permitted
+    my $ndc = 0;
+    my $idx = index $ip6data, '::';
+    while $idx.defined {
+    }
+
+    # split into fields
+    my @f = split ':', $ipv6-s, :v, :skip-empty;
+
+    my $ipvs = '';
+
+    return $ipv6;
 }
 
 sub reverse-ipv6($ipv6) is export {
