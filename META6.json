@@ -13,13 +13,14 @@
     },
     "provides"    : {
         "Net::DNS::BIND::Manage" : "lib/Net/DNS/BIND/Manage.pm6"
-    },
+    },b
     "test-depends"     : [
 	"Test::META"
     ],
     "depends"     : [
 	"Digest::MD5",
-        "Net::IP::Lite"
+        "Net::IP::Lite",
+        "Getopt::Std"
     ],
     "resources" : [
     ]
