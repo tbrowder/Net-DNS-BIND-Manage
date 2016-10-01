@@ -13,7 +13,7 @@
     },
     "provides"    : {
         "Net::DNS::BIND::Manage" : "lib/Net/DNS/BIND/Manage.pm6"
-    },b
+    },
     "test-depends"     : [
 	"Test::META"
     ],
