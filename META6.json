@@ -18,7 +18,8 @@
 	"Test::META"
     ],
     "depends"     : [
-	"Digest::MD5"
+	"Digest::MD5",
+        "Net::IP::Lite"
     ],
     "resources" : [
     ]
