@@ -7,6 +7,6 @@ git clone https://github.com/tbrowder/Net-IP-Lite-Perl6.git
 TD=`pwd`
 echo "=== now working in dir '$TD' ==="
 # the coup de grace:
-#panda install Net-IP-Lite-Perl6/
-panda install ./Net-IP-Lite-Perl6
+panda install Net-IP-Lite-Perl6/
+#panda install ./Net-IP-Lite-Perl6
 #panda install .
