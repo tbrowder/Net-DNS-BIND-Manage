@@ -4,5 +4,5 @@ perl6:
     - latest
 install:
     - rakudobrew build-panda
-    - panda installdeps ../Net-IP-Lite-Perl6/lib
+    - panda install ../Net-IP-Lite-Perl6
     - panda installdeps .
