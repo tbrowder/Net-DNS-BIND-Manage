@@ -1,5 +1,6 @@
 unit module Net::DNS::BIND::Manage:ver<1.0.0>;
 
+use Net::IP::Lite;
 
 ##### local vars #####
 constant $bdir = 'bak';
@@ -166,46 +167,7 @@ sub check-or-create-files(:%opts, Str :$ttl = '3h') is export {
     }
 }
 
-sub is-ipv4($data) is export {
-    my $d = $data;
-
-    if $d ~~ m:s/(<-[\\]>)'.'/ {
-	#say "\$0 = '$0'";
-        $d ~~ s:g:s/(<-[\\]>)\./$0 /;
-	my @d = $d.words;
-	my $n = @d.elems;
-	return False if $n == 0 || $n > 4;
-
-	# if we have one to four octets of numbers 255 or less we consider it an IPv4
-	for @d -> $d {
-	    return False if $d !~~ /^ \d ** 1..3 $/;
-	    return False if $d > 255;
-	}
-	return True;
-    }
-    return False;
-}
-
-sub is-ipv6($data) is export {
-    my $d = $data;
-
-    # rough check
-    if $data !~~ m:i/ \s* <[a-f\:\d]>+ \s* / {
-        return False;
-    }
-    die "fix this"
-
-    my @d = $d.split(':');
-    my $n = @d.elems;
-    return False if $n == 0 || $n > 15;
-
-    for @d -> $d {
-	return False if $d !~~ /^ \d ** 1..8 $/;
-	return False if $d > 0xffff_ffff;
-    }
-    return True;
-}
-
+=begin pod
 sub reverse-dotted-net($dotted-token) is export {
     # from h2n, sub REVERSE:
     #
@@ -215,7 +177,7 @@ sub reverse-dotted-net($dotted-token) is export {
 
     my $d = $dotted-token;
 
-=begin pod
+#=begin pod
 
     #say "================";
     #say "\$ip in = '$d'";
@@ -226,7 +188,7 @@ sub reverse-dotted-net($dotted-token) is export {
     $d = $dotted-token;
     #say "\$ip in = '$d'";
 
-=end pod
+#=end pod
 
     if $d ~~ m:s/(<-[\\]>)'.'/ {
 	#say "\$0 = '$0'";
@@ -267,6 +229,7 @@ sub fill-ipv6($ip6data) is export {
 sub reverse-ipv6($ipv6) is export {
     # may be in one of many forms!!
 }
+=end pod
 
 sub read-zone-serial-from-file($file) returns Int is export {
     my Int $serial = 0;
