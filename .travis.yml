@@ -6,5 +6,6 @@ cache:
     directories
     - $HOME/Net-IP-Lite-Perl6
 install:
+    - rakudobrew build-panda
     - git clone https://github.com/tbrowder/Net-IP-Lite-Perl6.git
     - panda installdeps .
