@@ -4,5 +4,6 @@ perl6:
     - latest
 install:
     - rakudobrew build-panda
-    - panda install ../Net-IP-Lite-Perl6
-    - panda installdeps .
+    - panda install zef
+    - git clone https://github.com/tbrowder/Net-IP-Lite-Perl6.git
+    - zef installdeps .
