@@ -1,13 +1,19 @@
 sudo: false
 language: perl6
 
+env:
+    - MODDIR=Net-IP-Lite-Perl6
+    - TBROWDER_HOME=/home/travis/build/tbrowder
+    - PERL6LIB=$TBROWDER_HOME/$MODDIR/lib
+
 before_install:
     - ./a-before-install.sh
+    - ./a-get-external-deps.sh
 
 install:
     - ./b-install.sh
     - rakudobrew build-panda
-    - ./install-net-ip-lite.sh
+    - ./b-install-external-deps.sh
     - panda installdeps .
 
 before_script:
