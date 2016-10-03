@@ -2,9 +2,7 @@ sudo: false
 language: perl6
 
 env:
-    - MODDIR=Net-IP-Lite-Perl6
-    - TBROWDER_HOME=$HOME/$USER/build/tbrowder
-    - PERL6LIB=$TBROWDER_HOME/$MODDIR/lib
+    - MODDIR=Net-IP-Lite-Perl6 TBROWDER_HOME=$HOME/$USER/build/tbrowder PERL6LIB=$TBROWDER_HOME/$MODDIR/lib
 
 before_install:
     - ./a-before-install.sh
