@@ -1,4 +1,4 @@
 #!/bin/sh
 
-cd $TBROWDER_HOME/$MODDIR
+cd $TBROWDER_HOME/$MODDIR/$DEP_MODDIR
 panda install .
