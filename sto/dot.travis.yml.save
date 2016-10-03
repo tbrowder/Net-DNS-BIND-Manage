@@ -1,0 +1,24 @@
+sudo: false
+language: perl6
+
+env:
+    - PERL6LIB=$HOME/$USER/build/tbrowder/Net-DNS-BIND-Manage-Perl6/Net-IP-Lite-Perl6/lib
+
+before_install:
+    - ./a-before-install.sh
+    - ./a-get-external-deps.sh
+
+install:
+    - ./b-install.sh
+    - rakudobrew build-panda
+    - ./b-install-external-deps.sh
+    - panda installdeps .
+
+before_script:
+    - ./c-before-script.sh
+
+script:
+    - ./d-script.sh
+
+after_script:
+    - ./e-after-script.sh
