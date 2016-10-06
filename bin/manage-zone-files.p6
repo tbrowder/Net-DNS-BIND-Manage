@@ -26,7 +26,8 @@ Checking at the moment merely checks the serial number and existence of
 the files. Eventually, the check will be by the appropriate bind9
 utility program.
 
-All is based on the list of domains, hosts, and reverse mapped domains.
+All is based on the list of domains, hosts, and reverse mapped
+domains.
 
 =end pod
 
@@ -47,7 +48,7 @@ sub usage() {
     Options:
 
       -R <reponsible party e-mail> default: 'root@domain'
-      -f <hosts file>              default: 'hosts' 
+      -f <hosts file>              default: 'hosts'
       -r create rDNS (reverse mapping) zone files
       -v verbose
       -d debug
@@ -62,15 +63,15 @@ usage() if !getopts(
     @*ARGS
 );
 usage() if !%opts;
-if %opts<c> {
+if %opts<c>:exists {
     $create = True;
 }
 else {
     $check = True;
 }
-$debug   = True if %opts<d>;
-$verbose = True if %opts<v> || $debug;
-$rdns    = True if %opts<r>;
+$debug   = True if %opts<d>:exists;
+$verbose = True if %opts<v>:exists || $debug;
+$rdns    = True if %opts<r>:exists;
 ##### end option handling ##########################
 
 # responsible party
