@@ -1,4 +1,4 @@
-unit module Net::DNS::BIND::Manage:ver<1.0.0>;
+unit module Net::DNS::BIND::Manage;
 
 use Net::IP::Lite;
 
