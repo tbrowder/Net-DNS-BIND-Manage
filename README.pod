@@ -2,7 +2,7 @@
 
 =encoding utf8
 
-=head2 Net::DNS::BIND::Manage
+=head1 Net::DNS::BIND::Manage
 
 Provides dns zone management tools for Bind 9 similar to *h2n* (see "DNS
 and BIND").
