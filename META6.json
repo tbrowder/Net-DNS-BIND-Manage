@@ -4,7 +4,7 @@
     "version"     : "0.1.0",
     "description" : "Provides management of DNS zone files for the Bind DNS server software",
     "authors"     : [ "github:tbrowder" ],
-    "license"     : "Artistic 2.0",
+    "license"     : "Artistic-2.0",
     "source-type" : "git",
     "source-url"  : "git://github.com/tbrowder/Net-DNS-BIND-Manage-Perl6.git",
     "support"     : {
