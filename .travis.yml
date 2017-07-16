@@ -2,5 +2,5 @@ sudo: false
 language: perl6
 
 install:
-    - rakudobrew build-panda
-    - panda installdeps .
+    - rakudobrew build-zef
+    - zef install --depsonly .
