@@ -7,4 +7,4 @@ before_install:
     - sudo chown -R travis.travis /home/travis/.zef/
 install:
     # the following command avoids double-testing of the target module:
-    - zef --depsonly install .
+    - zef --deps-only install .
