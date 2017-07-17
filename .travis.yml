@@ -1,6 +1,10 @@
-sudo: false
-language: perl6
-
+sudo: required
+before_install:
+    - wget https://github.com/nxadm/rakudo-pkg/releases/download/2017.03_02/perl6-rakudo-moarvm-ubuntu16.04_20170300-02_amd64.deb
+    - sudo dpkg --install perl6-rakudo-moarvm-ubuntu16.04_20170300-02_amd64.deb
+    - sudo /opt/rakudo/bin/install_zef_as_root.sh
+    - export PATH=/opt/rakudo/bin:$PATH
+    - sudo chown -R travis.travis /home/travis/.zef/
 install:
-    - rakudobrew build-zef
-    - zef install --depsonly .
+    # the following command avoids double-testing of the target module:
+    - zef --depsonly install .
