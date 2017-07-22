@@ -6,4 +6,5 @@ before_install:
     - export PATH=/opt/rakudo/bin:$PATH
     - sudo chown -R travis.travis /home/travis/.zef/
 install:
+    - zef update
     - zef --verbose install .
