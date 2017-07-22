@@ -87,24 +87,18 @@ edited as desired and changes will not be overwritten.
 
 =head2 Installation
 
-Use one of the following two methods for a normal  Perl 6 environment:
+Use the recommended method for a normal Perl 6 environment:
 
   zef install Net::DNS::BIND::Manage
-  panda install Net::DNS::BIND::Manage
 
-If either attempt shows that the module isn't found or available,
+If the attempt shows that the module isn't found or available,
 ensure your installer is current:
 
   zef update
-  panda update
 
 If you want to use the latest version in the git repository, clone it and then:
 
   cd /path/to/cloned/repository/directory
   zef install .
-
-or
-
-  panda install .
 
 =cut

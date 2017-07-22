@@ -6,5 +6,4 @@ before_install:
     - export PATH=/opt/rakudo/bin:$PATH
     - sudo chown -R travis.travis /home/travis/.zef/
 install:
-    # the following command avoids double-testing of the target module:
-    - zef --deps-only install .
+    - zef --verbose install .
