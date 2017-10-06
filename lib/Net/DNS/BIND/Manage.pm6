@@ -21,11 +21,11 @@ my $ns1domain;
 my $ns2domain;
 my $rp;
 
-=begin pod
+=begin comment
     my (%h, @domains, %net, %host, $max-serial-len,
     $soa-spaces, $soa-cmn, $bakdir,
     $fhnamedmaster, $fhnamedslave);
-=end pod
+=end comment
 
 my @keywords = <
     mx
@@ -167,7 +167,7 @@ sub check-or-create-files(:%opts, Str :$ttl = '3h') is export {
     }
 }
 
-=begin pod
+=begin comment
 sub reverse-dotted-net($dotted-token) is export {
     # from h2n, sub REVERSE:
     #
@@ -177,7 +177,7 @@ sub reverse-dotted-net($dotted-token) is export {
 
     my $d = $dotted-token;
 
-#=begin pod
+#=begin comment
 
     #say "================";
     #say "\$ip in = '$d'";
@@ -188,7 +188,7 @@ sub reverse-dotted-net($dotted-token) is export {
     $d = $dotted-token;
     #say "\$ip in = '$d'";
 
-#=end pod
+#=end comment
 
     if $d ~~ m:s/(<-[\\]>)'.'/ {
 	#say "\$0 = '$0'";
@@ -229,7 +229,7 @@ sub fill-ipv6($ip6data) is export {
 sub reverse-ipv6($ipv6) is export {
     # may be in one of many forms!!
 }
-=end pod
+=end comment
 
 sub read-zone-serial-from-file($file) returns Int is export {
     my Int $serial = 0;
@@ -425,7 +425,7 @@ sub append-to-named-master(IO::Handle:D $fh, $domain) {
     };
     END
 
-    $fh.print($s);
+    $fh.print: $s;
 }
 
 sub append-to-named-slave(IO::Handle:D $fh, $domain) {
@@ -438,5 +438,5 @@ sub append-to-named-slave(IO::Handle:D $fh, $domain) {
     };
     END
 
-    $fh.print($s);
+    $fh.print: $s;
 }

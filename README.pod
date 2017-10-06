@@ -41,8 +41,8 @@ a slave.  It is designed to use one mandatory, user-supplied data file
 and two optional, user-supplied data files.
 
 The user should dedicate a directory to zone management and it should
-be under version control.  When the management tool is run it will
-create three directories:
+be under version control.  When the management tool is run in the
+chosen directory it will create three directories:
 
   master
   slave

@@ -1,10 +1,7 @@
 #!/usr/bin/env perl6
 
-use Getopt::Std;
-
 use lib <../lib ../../../../lib>;
 use Net::DNS::BIND::Manage;
-
 
 =begin pod
 
@@ -32,8 +29,13 @@ domains.
 =end pod
 
 ##### option handling ##############################
-my %opts;
-my ($create, $check, $debug, $verbose, $rdns, $tmpl);
+my $resp    = 0;
+my $create  = 0;
+my $check   = 0;
+my $debug   = 0;
+my $verbose = 0;
+my $rdns    = 0;
+my $tmpl    = 0;
 sub usage() {
     say qq:to/END/;
     Usage: $*PROGRAM -c | -C [-v, -d, -r, -R, -f]
@@ -56,6 +58,8 @@ sub usage() {
 
     exit;
 }
+
+=begin pod
 # check for proper getopts signature
 usage() if !getopts(
     'CcdvrR:f:',    # option string
@@ -70,15 +74,23 @@ else {
     $check = True;
 }
 $debug   = True if %opts<d>:exists;
+
 $verbose = True if %opts<v>:exists || $debug;
 $rdns    = True if %opts<r>:exists;
+=end pod
+if !@*ARGS {
+    usage();
+}
+
+my %opts;
 ##### end option handling ##########################
+
 
 # responsible party
 my $rp  = 'tom\.browder.gmail.com';
-my $ttl = '3h'; # standard, shorten when doing maintenance or changes
+my $ttl = '3h'; # standard, may shorten when doing maintenance or changes
 
-check-or-create-files(:%opts, :$ttl);
+check-or-create-file :%opts, :$ttl;
 
 if $check {
     say 'Exiting after check.';
