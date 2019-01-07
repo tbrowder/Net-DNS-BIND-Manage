@@ -1,6 +1,6 @@
 unit module Net::DNS::BIND::Manage;
 
-use Net::IP::Lite;
+use Net::IP;
 
 ##### local vars #####
 constant $bdir = 'bak';

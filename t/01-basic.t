@@ -3,7 +3,7 @@ use lib <lib ../lib>;
 use Test;
 
 use Net::DNS::BIND::Manage;
-use Net::IP::Lite :ALL;
+use Net::IP :ALL;
 
 # test 1
 # need a file for hashing
