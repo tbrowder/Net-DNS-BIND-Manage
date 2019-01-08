@@ -20,7 +20,7 @@
     "depends"     : [
 	"Digest::MD5",
         "Getopt::Std",
-        "Net::IP::Lite"
+        "Net::IP"
     ],
     "resources" : [
     ]
