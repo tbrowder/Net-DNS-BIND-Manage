@@ -4,7 +4,7 @@
 
 =head1 Net::DNS::BIND::Manage
 
-Provides dns zone management tools for Bind 9 similar to *h2n* (see "DNS
+Provides dns zone management tools for Bind 9 similar to B<h2n> (see "DNS
 and BIND").
 
 =for HTML <a href="https://travis-ci.org/tbrowder/Net-DNS-BIND-Manage-Perl6">
